@@ -1,0 +1,13 @@
+import os, glob
+
+configfile: "../config/config.yaml"
+
+GENOMES = os.path.expanduser(config["genomes"])
+SPECIES = [os.path.basename(os.path.dirname(p))
+           for p in glob.glob(os.path.join(GENOMES, "*/fasta_files"))]
+
+rule all:
+    input:
+        expand("results/skani/{sp}_ani_edge_list.txt", sp=SPECIES)
+
+include: "rules/ani_distribution.smk"

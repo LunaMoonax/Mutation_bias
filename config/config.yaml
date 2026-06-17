@@ -1,0 +1,4 @@
+genomes: "~/shared-team/2025-masters-project/people/johanna_genomes"
+
+skani:
+    threads: 16
