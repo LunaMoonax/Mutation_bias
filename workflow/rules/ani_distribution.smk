@@ -24,7 +24,10 @@ rule ani_distributions:
         ani_dist = "results/ani/ani_distribution.png",
         ani_violin = "results/ani/ani_violin.png"
     params:
-        output_dir = "results/ani/"
+        output_dir = "results/ani/",
+        floor = config["ani_distribution_plot"]["floor"],
+        mad_k = config["ani_distribution_plot"]["mad_k"],
+        min_drop = config["ani_distribution_plot"]["min_drop"]
     conda:
         "../envs/py.yaml"
     script:

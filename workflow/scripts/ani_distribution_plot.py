@@ -7,9 +7,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-FLOOR = 95.0
-MAD_K = 5.0
-MIN_DROP = 0.5
+FLOOR = snakemake.params.floor
+MAD_K = snakemake.params.mad_k
+MIN_DROP = snakemake.params.min_drop
 
 def genome_id (p):
     n = os.path.basename(str(p).strip())
@@ -77,9 +77,11 @@ def plot_ani_distribution (all_med, output_dir):
         ax.axhline(FLOOR, color="blue", ls="--", lw=1)
         fence = all_med.loc[all_med["species"] == sp, "mad_fence"].iloc[0]
         ax.axhline(fence, color="green", ls=":", lw=1)
+        drop = all_med.loc[all_med["species"] == sp, "species_median"].iloc[0] - MIN_DROP
+        ax.axhline(drop, color="orange", ls=":", lw=1)
     g.set_titles("{col_name}")
     g.figure.suptitle("Per-genome median ANI\n"
-        "Blue dashed line: 95% ANI floor. Green dotted line: MAD fence",
+        "Blue dashed line: 95% ANI floor. Green dotted line: MAD fence. Orange dotted line: drop threshold.",
         y=1.02)
     g.set_axis_labels("genome (ordered by median ANI)", "median ANI")
     g.savefig(f"{output_dir}/ani_distribution.png",
