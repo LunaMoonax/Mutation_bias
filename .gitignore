@@ -1,3 +1,4 @@
 results/
 .snakemake/
 .ipynb_checkpoints/
+run.sh

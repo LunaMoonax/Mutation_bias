@@ -8,6 +8,9 @@ SPECIES = [os.path.basename(os.path.dirname(p))
 
 rule all:
     input:
-        expand("results/skani/{sp}_ani_edge_list.txt", sp=SPECIES)
+        "results/ani/ani_distribution.png",
+        "results/ani/ani_violin.png",
+        "results/ani/failed_genomes.txt",
+        expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
 
 include: "rules/ani_distribution.smk"

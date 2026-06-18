@@ -14,5 +14,19 @@ rule skani:
         skani triangle -l {params.listfile} -E -t {threads} -o {output.ani}
         """
         
-    
+rule ani_distributions:
+    input:
+        edge_list   = expand("results/skani/{sp}_ani_edge_list.txt", sp=SPECIES),
+        genome_list = expand("results/skani/{sp}_list.txt", sp=SPECIES),
+    output:
+        passed = expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
+        failed = "results/ani/failed_genomes.txt",
+        ani_dist = "results/ani/ani_distribution.png",
+        ani_violin = "results/ani/ani_violin.png"
+    params:
+        output_dir = "results/ani/"
+    conda:
+        "../envs/py.yaml"
+    script:
+        "../scripts/ani_distribution_plot.py"
     
