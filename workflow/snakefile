@@ -14,7 +14,8 @@ rule all:
         "results/ani/ani_violin.png",
         "results/ani/failed_genomes.txt",
         expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
-        os.path.join(config["reference_genomes"]["db_dir"], "refseq_db.tar")
+        os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226-k31.dna.zip"),
+        os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226.lineages.csv")
 
 include: "rules/ani_distribution.smk"
 

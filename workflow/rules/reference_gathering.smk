@@ -1,12 +1,15 @@
 rule reference_database:
     output:
-        db = os.path.join(config["reference_genomes"]["db_dir"], "refseq_db.tar")
-    params:
-        db_dir = config["reference_genomes"]["db_dir"]
+        db = os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226-k31.dna.zip"),
+        tax = os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226.lineages.csv")
     shell:
         """
-        curl -fL https://s3-us-west-2.amazonaws.com/sourmash-databases/2018-03-29/refseq-d2-k31.tar.gz \
-            -o {params.db_dir}/refseq_db.tar.gz
-        gunzip {params.db_dir}/refseq_db.tar.gz
+        curl -fL \
+            https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db.new/gtdb-rs226/gtdb-rs226-k31.dna.zip \
+            -o {output.db}
+        
+        curl -fL \
+            https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db.new/gtdb-rs226/gtdb-rs226.lineages.csv \
+            -o {output.tax}
         """
     
