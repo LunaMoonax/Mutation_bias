@@ -1,4 +1,13 @@
-genomes: "~/shared-team/2025-masters-project/people/johanna_genomes"
+# Path to the directory storing genomes is writen in local config file (config_local.yaml)
+genomes: ""
 
 skani:
     threads: 16
+
+ani_distribution_plot:
+    floor: 95
+    mad_k: 5
+    min_drop: 0.5
+
+reference_genomes:
+    db_dir: "../../databases"

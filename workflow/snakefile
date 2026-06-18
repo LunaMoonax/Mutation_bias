@@ -1,6 +1,8 @@
 import os, glob
 
 configfile: "../config/config.yaml"
+if os.path.exists("../config/config_local.yaml"):
+    configfile: "../config/config_local.yaml"
 
 GENOMES = os.path.expanduser(config["genomes"])
 SPECIES = [os.path.basename(os.path.dirname(p))
@@ -12,5 +14,8 @@ rule all:
         "results/ani/ani_violin.png",
         "results/ani/failed_genomes.txt",
         expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
+        os.path.join(config["reference_genomes"]["db_dir"], "refseq_db.tar")
 
 include: "rules/ani_distribution.smk"
+
+include: "rules/reference_gathering.smk"
