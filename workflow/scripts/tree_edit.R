@@ -32,6 +32,8 @@ n_out <- sum(data$status == "Outlier")
 p <- ggtree(tree, size = 0.2) %<+% data +
     geom_tippoint(aes(color = status)) +
     scale_color_manual(values = c(Kept = "grey70", Outlier = "red")) +
+    theme_tree2() +
+    xlab("Substitutions per site") +
     labs(color = NULL, title = sprintf("%s  (%d outliers / %d genomes)",
                                        species, n_out, n_tips)) +
     theme(legend.position = "right")
