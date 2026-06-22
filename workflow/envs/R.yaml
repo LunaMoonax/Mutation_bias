@@ -1,0 +1,9 @@
+name: R
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base
+  - r-ggplot2
+  - bioconductor-treeio
+  - bioconductor-ggtree

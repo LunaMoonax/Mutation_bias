@@ -15,7 +15,7 @@ rule parsnp_allign:
     output:
         align = "results/tree/parsnp/{sp}_parsnp/parsnp.snps.mblocks"
     params:
-        output_dir = directory("results/tree/parsnp/{sp}_parsnp")
+        output_dir = "results/tree/parsnp/{sp}_parsnp"
     threads: config["parsnp"]["threads"]
     conda:
         "../envs/parsnp.yaml"
@@ -37,4 +37,13 @@ rule fasttree:
         fasttree -nt -gtr -gamma {input.align} > {output.tree}
         """
     
-    
+rule color_tree:
+    input:
+        tree = "results/tree/{sp}.nwk",
+        failed = "results/ani/failed_genomes.txt"
+    output:
+        tree_colored = "results/tree/{sp}_tree.png"
+    conda:
+        "../envs/R.yaml"
+    script:
+        "../scripts/tree_edit.R"
