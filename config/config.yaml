@@ -9,5 +9,8 @@ ani_distribution_plot:
     mad_k: 5
     min_drop: 0.5
 
+parsnp:
+    threads: 8
+
 reference_genomes:
     db_dir: "../../databases"

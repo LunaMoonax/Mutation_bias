@@ -135,3 +135,6 @@ pd.concat(failed, ignore_index=True).to_csv(
 
 plot_ani_distribution(pd.concat(all_med, ignore_index=True), output_dir)
 plot_ani_violin(pd.concat(all_ani, ignore_index=True), output_dir)
+
+all_med_df = pd.concat(all_med, ignore_index=True)
+all_med_df.to_csv(f"{output_dir}/ani_qc.csv", index=False)

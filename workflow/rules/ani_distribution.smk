@@ -19,6 +19,7 @@ rule ani_distributions:
         edge_list   = expand("results/skani/{sp}_ani_edge_list.txt", sp=SPECIES),
         genome_list = expand("results/skani/{sp}_list.txt", sp=SPECIES),
     output:
+        qc = "results/ani/ani_qc.csv",
         passed = expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
         failed = "results/ani/failed_genomes.txt",
         ani_dist = "results/ani/ani_distribution.png",

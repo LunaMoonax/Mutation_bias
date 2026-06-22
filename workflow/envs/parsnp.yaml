@@ -1,0 +1,7 @@
+name: parsnp
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - parsnp
