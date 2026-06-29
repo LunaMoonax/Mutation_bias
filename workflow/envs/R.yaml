@@ -7,3 +7,4 @@ dependencies:
   - r-ggplot2
   - bioconductor-treeio
   - bioconductor-ggtree
+  - r-ape

@@ -1,8 +1,8 @@
 rule pick_tree_ref:
     input:
-        qc = "results/ani/ani_qc.csv"
+        qc = "results/QC/ani/ani_qc.csv"
     output:
-        ref = "results/tree/{sp}_ref.txt"
+        ref = "results/QC/tree/{sp}_ref.txt"
     params:
         genomes_dir = GENOMES
     script:
@@ -10,12 +10,12 @@ rule pick_tree_ref:
 
 rule parsnp_allign:
     input:
-        ref = "results/tree/{sp}_ref.txt",
+        ref = "results/QC/tree/{sp}_ref.txt",
         genome_dir = f"{GENOMES}/{{sp}}/fasta_files"
     output:
-        align = "results/tree/parsnp/{sp}_parsnp/parsnp.snps.mblocks"
+        align = "results/QC/tree/parsnp/{sp}_parsnp/parsnp.snps.mblocks"
     params:
-        output_dir = "results/tree/parsnp/{sp}_parsnp"
+        output_dir = "results/QC/tree/parsnp/{sp}_parsnp"
     threads: config["parsnp"]["threads"]
     conda:
         "../envs/parsnp.yaml"
@@ -27,9 +27,9 @@ rule parsnp_allign:
 
 rule fasttree:
     input:
-        align = "results/tree/parsnp/{sp}_parsnp/parsnp.snps.mblocks"
+        align = "results/QC/tree/parsnp/{sp}_parsnp/parsnp.snps.mblocks"
     output:
-        tree = "results/tree/{sp}.nwk"
+        tree = "results/QC/tree/{sp}.nwk"
     conda:
         "../envs/fasttree.yaml"
     shell:
@@ -39,10 +39,10 @@ rule fasttree:
     
 rule color_tree:
     input:
-        tree = "results/tree/{sp}.nwk",
-        failed = "results/ani/failed_genomes.txt"
+        tree = "results/QC/tree/{sp}.nwk",
+        failed = "results/QC/ani/failed_genomes.txt"
     output:
-        tree_colored = "results/tree/{sp}_tree.png"
+        tree_colored = "results/QC/tree/{sp}_tree.png"
     conda:
         "../envs/R.yaml"
     script:

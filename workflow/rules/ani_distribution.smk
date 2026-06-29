@@ -2,7 +2,7 @@ rule skani:
     input:
         fastas = lambda wc: glob.glob(f"{GENOMES}/{wc.sp}/fasta_files/*.fa")
     output:
-        ani = "results/skani/{sp}_ani_edge_list.txt"
+        ani = "results/QC/skani/{sp}_ani_edge_list.txt"
     params:
         listfile = lambda wc: f"results/skani/{wc.sp}_list.txt"
     conda:
@@ -16,16 +16,16 @@ rule skani:
         
 rule ani_distributions:
     input:
-        edge_list   = expand("results/skani/{sp}_ani_edge_list.txt", sp=SPECIES),
-        genome_list = expand("results/skani/{sp}_list.txt", sp=SPECIES),
+        edge_list   = expand("results/QC/skani/{sp}_ani_edge_list.txt", sp=SPECIES),
+        genome_list = expand("results/QC/skani/{sp}_list.txt", sp=SPECIES),
     output:
-        qc = "results/ani/ani_qc.csv",
+        qc = "results/QC/ani/ani_qc.csv",
         passed = expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
-        failed = "results/ani/failed_genomes.txt",
-        ani_dist = "results/ani/ani_distribution.png",
-        ani_violin = "results/ani/ani_violin.png"
+        failed = "results/QC/ani/failed_genomes.txt",
+        ani_dist = "results/QC/ani/ani_distribution.png",
+        ani_violin = "results/QC/ani/ani_violin.png"
     params:
-        output_dir = "results/ani/",
+        output_dir = "results/QC/ani/",
         floor = config["ani_distribution_plot"]["floor"],
         mad_k = config["ani_distribution_plot"]["mad_k"],
         min_drop = config["ani_distribution_plot"]["min_drop"]
