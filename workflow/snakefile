@@ -7,9 +7,12 @@ if os.path.exists("../config/config_local.yaml"):
 GENOMES = os.path.expanduser(config["genomes"])
 SPECIES = [os.path.basename(os.path.dirname(p))
            for p in glob.glob(os.path.join(GENOMES, "*/fasta_files"))]
+TEST = os.path.basename(os.path.join(GENOMES, "acinetobacter_baumannii"))
 
 rule all:
     input:
+        os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226.lineages.csv"),
+        expand("results/sourmash/{sp}_results.csv", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
@@ -20,5 +23,6 @@ rule all:
 # QC STEPS:
 #include: "rules/ani_distribution.smk"
 #include: "rules/tree_qc.smk"
-#include: "rules/reference_gathering.smk"
 #include: "rules/plot_close_clusters.smk"
+
+include: "rules/reference_gathering.smk"

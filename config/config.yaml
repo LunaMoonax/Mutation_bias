@@ -14,3 +14,7 @@ parsnp:
 
 reference_genomes:
     db_dir: "../../databases"
+
+sourmash:
+    k: 31
+    scale: 1000

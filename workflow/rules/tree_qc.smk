@@ -6,7 +6,7 @@ rule pick_tree_ref:
     params:
         genomes_dir = GENOMES
     script:
-        "../scripts/pick_tree_ref.py"
+        "../scripts/pick_ref.py"
 
 rule parsnp_allign:
     input:
