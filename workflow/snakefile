@@ -12,7 +12,8 @@ TEST = os.path.basename(os.path.join(GENOMES, "acinetobacter_baumannii"))
 rule all:
     input:
         expand("results/sourmash/ref/{sp}_fallbacks.csv", sp=TEST),
-        expand("results/sourmash/ref/{sp}_ref.acc", sp=TEST)
+        expand("results/sourmash/ref/{sp}_ref.fna", sp=TEST),
+        expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",

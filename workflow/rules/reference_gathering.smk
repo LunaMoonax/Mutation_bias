@@ -82,4 +82,28 @@ rule filter_pick_ref:
     script:
         "../scripts/pick_sourmash_ref.py"
 
+rule download_ref:
+    input:
+        ref = "results/sourmash/ref/{sp}_ref.acc"
+    output:
+        fasta = "results/sourmash/ref/{sp}_ref.fna",
+        gff =   "results/sourmash/ref/{sp}_ref.gff"
+    params:
+        zip = "results/sourmash/ref/{sp}.zip",
+        tmp = "results/sourmash/ref/{sp}_tmp"
+    conda:
+        "../envs/ncbi.yaml"
+    shell:
+        """
+        datasets download genome accession $(cat {input.ref}) \
+            --include genome,gff3 \
+            --filename {params.zip}
+
+        unzip -o {params.zip} -d {params.tmp}
+
+        cp {params.tmp}/ncbi_dataset/data/*/*.fna {output.fasta}
+        cp {params.tmp}/ncbi_dataset/data/*/*.gff {output.gff}
+
+        rm -rf {params.tmp} {params.zip}
+        """
     
