@@ -40,7 +40,7 @@ rule fasttree:
 rule color_tree:
     input:
         tree = "results/QC/tree/{sp}.nwk",
-        failed = "results/QC/ani/failed_genomes.txt"
+        qc = "results/QC/ani/ani_qc.csv"
     output:
         tree_colored = "results/QC/tree/{sp}_tree.png"
     conda:

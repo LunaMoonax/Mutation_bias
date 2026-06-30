@@ -5,7 +5,7 @@ library(ggtree)
 library(ggplot2)
 
 tree_file <- snakemake@input[["tree"]]
-failed_file <- snakemake@input[["failed"]]
+qc_file <- snakemake@input[["qc"]]
 species <- snakemake@wildcards[["sp"]]
 output_file <- snakemake@output[["tree_colored"]]
 
@@ -15,8 +15,8 @@ clean_id <- function(x) {
 }
 
 tree <- read.tree(tree_file)
-failed <- read.csv(failed_file, stringsAsFactors = FALSE)
-failed_species <- failed[failed$species == species, , drop = FALSE]
+qc <- read.csv(qc_file, stringsAsFactors = FALSE)
+failed_species <- qc[qc$species == species & qc$exclude == TRUE, , drop = FALSE]
 outliers_id <- failed_species$genome
 
 data <- data.frame(

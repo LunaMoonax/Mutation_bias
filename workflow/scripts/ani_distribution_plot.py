@@ -111,7 +111,7 @@ output_dir = str(snakemake.params.output_dir)
 
 lists = {os.path.basename(i).replace("_list.txt", ""): i for i in input_list}
 
-all_med, all_ani, failed = [], [], []
+all_med, all_ani = [], []
 
 for edge_file in sorted(edge_files):
     species = os.path.basename(edge_file).replace("_ani_edge_list.txt", "")
@@ -120,18 +120,7 @@ for edge_file in sorted(edge_files):
     all_med.append(med)
 
     all_ani.append(pd.DataFrame({"species": species, "ani": pw}))
-    med.loc[~med["exclude"], "genome"].to_csv(
-        f"{output_dir}/{species}_passed_genomes.txt", index=False, header=False
-    )
-    failed.append(
-        med.loc[med["exclude"],
-            ["species", "genome", "median_ani", "species_median", "reason"]]
-    )
     print(f"{species:30s} kept {(~med['exclude']).sum():4d}  excluded {med['exclude'].sum():3d}")
-
-pd.concat(failed, ignore_index=True).to_csv(
-    f"{output_dir}/failed_genomes.txt", index=False
-)
 
 plot_ani_distribution(pd.concat(all_med, ignore_index=True), output_dir)
 plot_ani_violin(pd.concat(all_ani, ignore_index=True), output_dir)
