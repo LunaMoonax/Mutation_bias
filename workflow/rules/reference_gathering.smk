@@ -1,16 +1,11 @@
 rule reference_database:
     output:
-        db = os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226-k31.dna.zip"),
-        tax = os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226.lineages.csv")
+        db = os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226-k31.dna.zip")
     shell:
         """
         curl -fL \
             https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db.new/gtdb-rs226/gtdb-rs226-k31.dna.zip \
             -o {output.db}
-        
-        curl -fL \
-            https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db.new/gtdb-rs226/gtdb-rs226.lineages.csv \
-            -o {output.tax}
         """
 
 rule pick_ref:
@@ -50,5 +45,25 @@ rule sourmash_search:
     shell:
         """
         sourmash search {input.sig} {input.db} --containment -o {output.res}
+        """
+
+rule ncbi_datasets:
+    input:
+        csv = "results/sourmash/{sp}_results.csv"
+    output:
+        data = "results/sourmash/ncbi/{sp}_data.tsv"
+    params:
+        ntop = config["sourmash"]["data_top"]
+    conda:
+        "../envs/ncbi.yaml"
+    shell:
+        """
+        awk -F',' -v n={params.ntop} 'NR>1 && NR<=n+1 {{print $4}}' {input.csv} \
+            | awk '{{print $1}}' > {output.data}.acc
+
+        datasets summary genome accession --inputfile {output.data}.acc --as-json-lines \
+            | dataformat tsv genome \
+                --fields accession,organism-name,assminfo-level,assmstats-number-of-contigs \
+            > {output.data}
         """
     

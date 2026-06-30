@@ -11,14 +11,18 @@ TEST = os.path.basename(os.path.join(GENOMES, "acinetobacter_baumannii"))
 
 rule all:
     input:
-        os.path.join(config["reference_genomes"]["db_dir"], "gtdb-rs226.lineages.csv"),
-        expand("results/sourmash/{sp}_results.csv", sp=TEST)
+        expand("results/sourmash/ncbi/{sp}_data.tsv", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
-        #expand("results/ani/{sp}_passed_genomes.txt", sp=SPECIES),
         #expand("results/tree/{sp}_tree.png", sp=SPECIES),
         #expand("results/close_clusters/{sp}_distribution.png", sp=SPECIES),
+
+rule clean:
+    shell:
+        """
+        rm -rf results/QC/close_clusters results/QC/skani results/QC/tree/parsnp
+        """
 
 # QC STEPS:
 #include: "rules/ani_distribution.smk"

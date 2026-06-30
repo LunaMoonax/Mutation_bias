@@ -2,4 +2,5 @@ results/
 .snakemake/
 .ipynb_checkpoints/
 run.sh
+clean.sh
 config_local.yaml

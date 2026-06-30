@@ -1,6 +1,7 @@
 # Path to the directory storing genomes is writen in local config file (config_local.yaml)
 genomes: ""
 
+# QC parameters
 skani:
     threads: 16
 
@@ -9,12 +10,15 @@ ani_distribution_plot:
     mad_k: 5
     min_drop: 0.5
 
+# parsnp is used both in QC and main workflow
 parsnp:
     threads: 8
 
+# Main workflow parameters
 reference_genomes:
     db_dir: "../../databases"
 
 sourmash:
     k: 31
     scale: 1000
+    data_top: 50
