@@ -87,7 +87,8 @@ rule download_ref:
         ref = "results/sourmash/ref/{sp}_ref.acc"
     output:
         fasta = "results/sourmash/ref/{sp}_ref.fna",
-        gff =   "results/sourmash/ref/{sp}_ref.gff"
+        gff =   "results/sourmash/ref/{sp}_ref.gff",
+        gbff  = "results/sourmash/ref/{sp}_ref.gbff"
     params:
         zip = "results/sourmash/ref/{sp}.zip",
         tmp = "results/sourmash/ref/{sp}_tmp"
@@ -96,13 +97,14 @@ rule download_ref:
     shell:
         """
         datasets download genome accession $(cat {input.ref}) \
-            --include genome,gff3 \
+            --include genome,gff3,gbff \
             --filename {params.zip}
 
         unzip -o {params.zip} -d {params.tmp}
 
         cp {params.tmp}/ncbi_dataset/data/*/*.fna {output.fasta}
         cp {params.tmp}/ncbi_dataset/data/*/*.gff {output.gff}
+        cp {params.tmp}/ncbi_dataset/data/*/*.gbff {output.gbff}
 
         rm -rf {params.tmp} {params.zip}
         """
