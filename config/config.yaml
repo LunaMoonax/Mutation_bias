@@ -21,4 +21,8 @@ reference_genomes:
 sourmash:
     k: 31
     scale: 1000
+    similarity: 0.9
+
+ncbi:
     data_top: 50
+    contig_n: 5

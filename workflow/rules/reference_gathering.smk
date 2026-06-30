@@ -8,11 +8,11 @@ rule reference_database:
             -o {output.db}
         """
 
-rule pick_ref:
+rule pick_genome:
     input:
         qc = "results/QC/ani/ani_qc.csv"
     output:
-        ref = "results/sourmash/ref/{sp}_ref.txt"
+        ref = "results/sourmash/genome/{sp}.txt"
     params:
         genomes_dir = GENOMES
     script:
@@ -20,7 +20,7 @@ rule pick_ref:
 
 rule sketching_sample:
     input:
-        fasta_file = "results/sourmash/ref/{sp}_ref.txt"
+        fasta_file = "results/sourmash/genome/{sp}.txt"
     output:
         sig = "results/sourmash/sig_files/{sp}_genome.sig"
     params:
@@ -53,7 +53,7 @@ rule ncbi_datasets:
     output:
         data = "results/sourmash/ncbi/{sp}_data.tsv"
     params:
-        ntop = config["sourmash"]["data_top"]
+        ntop = config["ncbi"]["data_top"]
     conda:
         "../envs/ncbi.yaml"
     shell:
@@ -66,4 +66,20 @@ rule ncbi_datasets:
                 --fields accession,organism-name,assminfo-level,assmstats-number-of-contigs \
             > {output.data}
         """
+
+rule filter_pick_ref:
+    input:
+        sourmash_csv = "results/sourmash/{sp}_results.csv",
+        ncbi_tsv = "results/sourmash/ncbi/{sp}_data.tsv"
+    output:
+        fallbacks = "results/sourmash/ref/{sp}_fallbacks.csv",
+        ref = "results/sourmash/ref/{sp}_ref.acc"
+    params:
+        sim = config["sourmash"]["similarity"],
+        contig = config["ncbi"]["contig_n"]
+    conda:
+        "../envs/py.yaml"
+    script:
+        "../scripts/pick_sourmash_ref.py"
+
     
