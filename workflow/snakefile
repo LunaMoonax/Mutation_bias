@@ -12,10 +12,11 @@ TEST = ["acinetobacter_baumannii"]
 rule all:
     input:
         expand("results/sourmash/ref/{sp}_fallbacks.csv", sp=TEST),
-        expand("results/sourmash/ref/{sp}_ref.fna", sp=TEST),
         expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST),
         expand(os.path.join(config["reference_genomes"]["db_dir"],
-                            "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST)
+                            "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST),
+        expand("results/parsnp/{sp}/parsnp.xmfa", sp=TEST),
+        expand("results/dataprep/{sp}/filtered.vcf", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
@@ -35,3 +36,5 @@ rule clean:
 
 include: "rules/reference_gathering.smk"
 include: "rules/snpeff.smk"
+include: "rules/parsnp.smk"
+include: "rules/remove_recombination.smk"
