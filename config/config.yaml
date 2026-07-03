@@ -12,7 +12,7 @@ ani_distribution_plot:
 
 # parsnp is used both in QC and main workflow
 parsnp:
-    threads: 8
+    threads: 16
 
 # Main workflow parameters
 reference_genomes:
@@ -26,3 +26,6 @@ sourmash:
 ncbi:
     data_top: 50
     contig_n: 5
+
+gubbins:
+    threads: 16
