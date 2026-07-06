@@ -17,7 +17,8 @@ rule all:
                             "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST),
         expand("results/dataprep/{sp}/filtered.vcf", sp=TEST),
         expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
-        expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST)
+        expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST),
+        expand("results/dataprep/{sp}/recombination_free.vcf", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",

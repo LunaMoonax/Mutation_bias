@@ -71,3 +71,14 @@ rule compare:
         "../envs/py.yaml"
     script:
         "../scripts/window_vs_gubbins.py"
+
+rule remove_recombination:
+    input:
+        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff",
+        vcf = "results/dataprep/{sp}/filtered.vcf"
+    output:
+        rec_free_vcf = "results/dataprep/{sp}/recombination_free.vcf"
+    conda:
+        "../envs/py.yaml"
+    script:
+        "../scripts/remove_recombinant_snps.py"
