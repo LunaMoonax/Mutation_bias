@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import bisect
+from collections import Counter
 
 def read_bed(bed_file):
     pos = set()
@@ -23,15 +24,22 @@ def read_gff(gff_file):
     intervals.sort()
     return intervals
 
-def read_vcf_positions(vcf_file):
+def read_vcf(vcf_file):
     pos = set()
+    minor_count = {}
     with open(vcf_file) as f:
         for line in f:
             if line.startswith("#"):
                 continue
             fields = line.strip().split("\t")
-            pos.add(int(fields[1]))
-    return pos
+            p = int(fields[1])
+            pos.add(p)
+
+            genomes = fields[10:]
+            n_alt = sum(1 for g in genomes if g == "1")
+            n_ref = sum(1 for g in genomes if g == "0")
+            minor_count[p] = min(n_alt, n_ref)
+    return pos, minor_count
 
 def interval_index(p, intervals, starts):
     i = bisect.bisect_right(starts, p) - 1
@@ -39,24 +47,42 @@ def interval_index(p, intervals, starts):
         return i
     return -1
 
+def freq_spectrum(pos_set, minor_count):
+    c = Counter()
+    for p in pos_set:
+        mc = minor_count.get(p, 0)
+        if mc == 1:
+            c["singleton"] += 1
+        elif mc == 2:
+            c["doubleton"] += 1
+        elif mc == 3:
+            c["tripleton"] += 1
+        else:
+            c["other"] += 1
+    return c
+
 window_all  = read_bed(snakemake.input.window_bed)
 gubbins_all = read_gff(snakemake.input.gubbins_gff)
-all_snps    = read_vcf_positions(snakemake.input.vcf)
+all_snps, minor_count = read_vcf(snakemake.input.vcf)
 gub_start   = [s for s, _ in gubbins_all]
 
-in_gubbins = sum(1 for p in window_all if interval_index(p, gubbins_all, gub_start) >= 0)
-gubbins_snp_total = sum(1 for p in all_snps if interval_index(p, gubbins_all, gub_start) >= 0)
+gubbins_snp_set  = {p for p in all_snps if interval_index(p, gubbins_all, gub_start) >= 0}
+both_set         = window_all & gubbins_snp_set
+window_only_set  = window_all - gubbins_snp_set
+gubbins_only_set = gubbins_snp_set - window_all
+neither_set      = all_snps - window_all - gubbins_snp_set
 
-n_win         = len(window_all)
-total_snps    = len(all_snps)
-both          = in_gubbins
-window_only   = n_win - both
-gubbins_only  = gubbins_snp_total - both
-neither       = total_snps - both - window_only - gubbins_only
-snp_union     = both + window_only + gubbins_only
-jaccard_snp   = both / snp_union if snp_union else None
-recall_snp    = both / gubbins_snp_total if gubbins_snp_total else None
-precision_snp = both / n_win if n_win else None
+n_win             = len(window_all)
+total_snps        = len(all_snps)
+gubbins_snp_total = len(gubbins_snp_set)
+both              = len(both_set)
+window_only       = len(window_only_set)
+gubbins_only      = len(gubbins_only_set)
+neither           = len(neither_set)
+snp_union         = both + window_only + gubbins_only
+jaccard_snp       = both / snp_union if snp_union else None
+recall_snp        = both / gubbins_snp_total if gubbins_snp_total else None
+precision_snp     = both / n_win if n_win else None
 
 def pct(x):
     return f"{x:.1%}" if x is not None else "n/a"
@@ -76,3 +102,21 @@ with open(snakemake.output.summary, "w") as f:
     out(f"precision (window -> gubbins) : {pct(precision_snp)}")
     out(f"recall (gubbins found by win) : {pct(recall_snp)}")
     out(f"Jaccard agreement             : {pct(jaccard_snp)}")
+
+    out("")
+    out("minor-allele frequency spectrum (singleton/doubleton/tripleton/other)")
+    for label, pos_set in [
+        ("all SNPs",       all_snps),
+        ("window-flagged", window_all),
+        ("gubbins-region", gubbins_snp_set),
+        ("both methods",   both_set),
+        ("window only",    window_only_set),
+        ("gubbins only",   gubbins_only_set),
+    ]:
+        c = freq_spectrum(pos_set, minor_count)
+        n = len(pos_set)
+        out(f"  {label:16s}: n={n}"
+            f"  singleton={c['singleton']} ({pct(c['singleton']/n if n else None)})"
+            f"  doubleton={c['doubleton']} ({pct(c['doubleton']/n if n else None)})"
+            f"  tripleton={c['tripleton']} ({pct(c['tripleton']/n if n else None)})"
+            f"  other={c['other']} ({pct(c['other']/n if n else None)})")
