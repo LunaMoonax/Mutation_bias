@@ -15,8 +15,9 @@ rule all:
         expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST),
         expand(os.path.join(config["reference_genomes"]["db_dir"],
                             "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST),
-        expand("results/parsnp/{sp}/parsnp.xmfa", sp=TEST),
-        expand("results/dataprep/{sp}/filtered.vcf", sp=TEST)
+        expand("results/dataprep/{sp}/filtered.vcf", sp=TEST),
+        expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
+        expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",

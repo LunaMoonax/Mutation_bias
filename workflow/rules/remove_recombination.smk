@@ -35,3 +35,39 @@ rule gubbins:
 
         cp -a {wildcards.sp}.* "$outdir"/
         """
+
+rule remap_gubbins_coords:
+    input:
+        xmfa = "results/parsnp/{sp}/parsnp.xmfa",
+        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.gff"
+    output:
+        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff"
+    conda:
+        "../envs/py.yaml"
+    script:
+        "../scripts/remap_gubbins_coords.py"
+
+rule sliding_window:
+    input:
+        vcf = "results/dataprep/{sp}/filtered.vcf"
+    output:
+        flagged = "results/dataprep/{sp}/recombination/window_flagged.bed"
+    params:
+        window = config["sliding_window"]["window"],
+        threshold = config["sliding_window"]["threshold"]
+    conda:
+        "../envs/py.yaml"
+    script:
+        "../scripts/rec_sliding_window.py"
+
+rule compare:
+    input:
+        window_bed = "results/dataprep/{sp}/recombination/window_flagged.bed",
+        gubbins_gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff",
+        vcf = "results/dataprep/{sp}/filtered.vcf"
+    output:
+        summary = "results/dataprep/{sp}/recombination/comparing_summary.txt"
+    conda:
+        "../envs/py.yaml"
+    script:
+        "../scripts/window_vs_gubbins.py"

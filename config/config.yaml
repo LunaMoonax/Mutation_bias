@@ -29,3 +29,7 @@ ncbi:
 
 gubbins:
     threads: 16
+
+sliding_window:
+    window: 2000
+    threshold: 3
