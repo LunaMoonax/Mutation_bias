@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import bisect
-from collections import Counter
+from collections import Counter, defaultdict
 
 def read_bed(bed_file):
     pos = set()
@@ -10,19 +10,30 @@ def read_bed(bed_file):
             if line.startswith("#"):
                 continue
             fields = line.strip().split("\t")
-            pos.update(range(int(fields[1]) + 1, int(fields[2]) + 1))
+            chrom = fields[0]
+            pos.update((chrom, p) for p in range(int(fields[1]) + 1, int(fields[2]) + 1))
     return pos
 
 def read_gff(gff_file):
-    intervals = []
+    intervals = defaultdict(list)
     with open(gff_file) as f:
         for line in f:
             if line.startswith("#"):
                 continue
             fields = line.strip().split("\t")
-            intervals.append((int(fields[3]), int(fields[4])))
-    intervals.sort()
-    return intervals
+            intervals[fields[0]].append((int(fields[3]), int(fields[4])))
+
+    merged = {}
+    for chrom, ivs in intervals.items():
+        ivs.sort()
+        m = []
+        for s, e in ivs:
+            if m and s <= m[-1][1] + 1:
+                m[-1] = (m[-1][0], max(m[-1][1], e))
+            else:
+                m.append((s, e))
+        merged[chrom] = m
+    return merged
 
 def read_vcf(vcf_file):
     pos = set()
@@ -32,16 +43,21 @@ def read_vcf(vcf_file):
             if line.startswith("#"):
                 continue
             fields = line.strip().split("\t")
+            chrom = fields[0]
             p = int(fields[1])
-            pos.add(p)
+            pos.add((chrom, p))
 
             genomes = fields[10:]
             n_alt = sum(1 for g in genomes if g == "1")
             n_ref = sum(1 for g in genomes if g == "0")
-            minor_count[p] = min(n_alt, n_ref)
+            minor_count[(chrom, p)] = min(n_alt, n_ref)
     return pos, minor_count
 
-def interval_index(p, intervals, starts):
+def interval_index(chrom, p, intervals_by_chrom, starts_by_chrom):
+    intervals = intervals_by_chrom.get(chrom)
+    if not intervals:
+        return -1
+    starts = starts_by_chrom[chrom]
     i = bisect.bisect_right(starts, p) - 1
     if i >= 0 and intervals[i][0] <= p <= intervals[i][1]:
         return i
@@ -49,8 +65,8 @@ def interval_index(p, intervals, starts):
 
 def freq_spectrum(pos_set, minor_count):
     c = Counter()
-    for p in pos_set:
-        mc = minor_count.get(p, 0)
+    for key in pos_set:
+        mc = minor_count.get(key, 0)
         if mc == 1:
             c["singleton"] += 1
         elif mc == 2:
@@ -64,9 +80,9 @@ def freq_spectrum(pos_set, minor_count):
 window_all  = read_bed(snakemake.input.window_bed)
 gubbins_all = read_gff(snakemake.input.gubbins_gff)
 all_snps, minor_count = read_vcf(snakemake.input.vcf)
-gub_start   = [s for s, _ in gubbins_all]
+gub_start   = {chrom: [s for s, _ in ivs] for chrom, ivs in gubbins_all.items()}
 
-gubbins_snp_set  = {p for p in all_snps if interval_index(p, gubbins_all, gub_start) >= 0}
+gubbins_snp_set  = {(chrom, p) for chrom, p in all_snps if interval_index(chrom, p, gubbins_all, gub_start) >= 0}
 both_set         = window_all & gubbins_snp_set
 window_only_set  = window_all - gubbins_snp_set
 gubbins_only_set = gubbins_snp_set - window_all
