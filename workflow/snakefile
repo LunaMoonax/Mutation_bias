@@ -17,11 +17,12 @@ rule all:
                             "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST),
         expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
         expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/recent_snps.vcf", sp=TEST),
         expand("results/dataprep/{sp}/tree_snp/branch_table.txt", sp=TEST),
         expand("results/dataprep/{sp}/tree_snp/stats.txt", sp=TEST),
         expand("results/dataprep/{sp}/tree_snp/zero_lookahead.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/tree_fig.png", sp=TEST)
+        expand("results/dataprep/{sp}/tree_snp/tree_fig.png", sp=TEST),
+        expand("results/dataprep/{sp}/singleton.vcf", sp=TEST),
+        expand("results/dataprep/{sp}/singleton_table.tsv", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
@@ -44,3 +45,4 @@ include: "rules/snpeff.smk"
 include: "rules/parsnp.smk"
 include: "rules/remove_recombination.smk"
 include: "rules/select_snps.smk"
+include: "rules/data_prep.smk"
