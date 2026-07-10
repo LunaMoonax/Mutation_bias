@@ -13,7 +13,9 @@ rule gubbins:
         xmfa = "results/parsnp/{sp}/parsnp.xmfa"
     output:
         aln  = "results/dataprep/{sp}/recombination/alignment.fasta",
-        recomb = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.gff"
+        recomb = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.gff",
+        embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.embl",
+        tree_labeled = "results/dataprep/{sp}/recombination/{sp}.node_labelled.final_tree.tre"
     params:
         prefix = "results/dataprep/{sp}/recombination/gubbins"
     threads: config["gubbins"]["threads"]
@@ -31,7 +33,8 @@ rule gubbins:
         cd "$workdir"
 
         run_gubbins.py --mar --prefix {wildcards.sp} --threads {threads} \
-            --first-model JC --tree-builder fasttree --iterations 3 "$aln"
+            --first-tree-builder fasttree --first-model JC \
+            --iterations 3 "$aln"
 
         cp -a {wildcards.sp}.* "$outdir"/
         """
@@ -39,9 +42,11 @@ rule gubbins:
 rule remap_gubbins_coords:
     input:
         xmfa = "results/parsnp/{sp}/parsnp.xmfa",
-        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.gff"
+        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.gff",
+        embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.embl"
     output:
-        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff"
+        gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff",
+        embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.ref_coords.embl"
     conda:
         "../envs/py.yaml"
     script:

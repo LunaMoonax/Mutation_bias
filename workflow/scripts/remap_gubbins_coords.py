@@ -58,10 +58,16 @@ def nearest_backward(mapping, i):
         i -= 1
     return mapping[i] if i >= 0 else None
 
-ref_index, ref_seqid, ref_length = find_reference(snakemake.input.xmfa)
-mapping = build_alignment_to_ref_map(snakemake.input.xmfa, ref_index)
+def remap_pos(mapping, aln_pos):
+    i = aln_pos - 1
+    if 0 <= i < len(mapping):
+        return mapping[i]
+    return None
 
-with open(snakemake.input.gff) as fin, open(snakemake.output.gff, "w") as fout:
+ref_index, ref_seqid, ref_length = find_reference(snakemake.input["xmfa"])
+mapping = build_alignment_to_ref_map(snakemake.input["xmfa"], ref_index)
+
+with open(snakemake.input["gff"], "r") as fin, open(snakemake.output["gff"], "w") as fout:
     fout.write("##gff-version 3\n")
     fout.write(f"##sequence-region {ref_seqid} 1 {ref_length}\n")
     for line in fin:
@@ -77,3 +83,26 @@ with open(snakemake.input.gff) as fin, open(snakemake.output.gff, "w") as fout:
         fields[3] = str(ref_start)
         fields[4] = str(ref_end)
         fout.write("\t".join(fields) + "\n")
+
+n_total = n_kept = n_gap = 0
+with open(snakemake.input["embl"], "r") as fin, open(snakemake.output["embl"], "w") as fout:
+    skip_record = False
+    for line in fin:
+        if line.startswith("FT") and "variation" in line.split():
+            n_total += 1
+            aln_pos = int(line.split()[-1])
+            ref_pos = remap_pos(mapping, aln_pos)
+            if ref_pos is None:
+                n_gap += 1
+                skip_record = True
+                continue
+            skip_record = False
+            n_kept += 1
+            fout.write(line.replace(f" {aln_pos}", f" {ref_pos}"))
+        elif skip_record and line.startswith("FT") and "variation" not in line.split():
+            continue
+        else:
+            skip_record = False
+            fout.write(line)
+
+print(f"branch SNPs: {n_kept}/{n_total} remapped ({n_gap} on reference gaps, dropped)")
