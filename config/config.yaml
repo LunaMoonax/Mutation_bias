@@ -33,3 +33,6 @@ gubbins:
 sliding_window:
     window: 2000
     threshold: 3
+
+snp_from_tree:
+    threshold: 1

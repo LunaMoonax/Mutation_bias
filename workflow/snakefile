@@ -7,7 +7,7 @@ if os.path.exists("../config/config_local.yaml"):
 GENOMES = os.path.expanduser(config["genomes"])
 SPECIES = [os.path.basename(os.path.dirname(p))
            for p in glob.glob(os.path.join(GENOMES, "*/fasta_files"))]
-TEST = ["acinetobacter_baumannii"]
+TEST = ["acinetobacter_baumannii", "bordetella_pertussis"]
 
 rule all:
     input:
@@ -15,10 +15,13 @@ rule all:
         expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST),
         expand(os.path.join(config["reference_genomes"]["db_dir"],
                             "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST),
-        expand("results/dataprep/{sp}/filtered.vcf", sp=TEST),
         expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
         expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST),
-        expand("results/dataprep/{sp}/recombination_free.vcf", sp=TEST)
+        expand("results/dataprep/{sp}/tree_snp/recent_snps.vcf", sp=TEST),
+        expand("results/dataprep/{sp}/tree_snp/branch_table.txt", sp=TEST),
+        expand("results/dataprep/{sp}/tree_snp/stats.txt", sp=TEST),
+        expand("results/dataprep/{sp}/tree_snp/zero_lookahead.txt", sp=TEST),
+        expand("results/dataprep/{sp}/tree_snp/tree_fig.png", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
@@ -40,3 +43,4 @@ include: "rules/reference_gathering.smk"
 include: "rules/snpeff.smk"
 include: "rules/parsnp.smk"
 include: "rules/remove_recombination.smk"
+include: "rules/select_snps.smk"
