@@ -18,3 +18,22 @@ rule snpeff_database:
         snpEff build -genbank -dataDir $(realpath {params.dir}) \
             -c {params.cfg} -v {wildcards.sp}
         """
+
+rule run_snpeff:
+    input:
+        vcf = "results/dataprep/{sp}/singleton.vcf",
+        db = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data/{sp}/snpEffectPredictor.bin")
+    output:
+        vcf = "results/dataprep/{sp}/singletons.annotated.vcf",
+        summary = "results/dataprep/{sp}/snpeff_summary.html"
+    params:
+        dir = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data"),
+        cfg = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/{sp}_snpeff.config")
+    conda:
+        "../envs/snpeff.yaml"
+    shell:
+        """
+        snpEff ann -dataDir $(realpath {params.dir}) \
+            -c {params.cfg} -stats {output.summary} \
+            {wildcards.sp} {input.vcf} > {output.vcf}
+        """

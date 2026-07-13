@@ -13,8 +13,6 @@ rule all:
     input:
         expand("results/sourmash/ref/{sp}_fallbacks.csv", sp=TEST),
         expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST),
-        expand(os.path.join(config["reference_genomes"]["db_dir"],
-                            "snpeff/data/{sp}/snpEffectPredictor.bin"), sp=TEST),
         expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
         expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST),
         expand("results/dataprep/{sp}/tree_snp/branch_table.txt", sp=TEST),
@@ -22,7 +20,9 @@ rule all:
         expand("results/dataprep/{sp}/tree_snp/zero_lookahead.txt", sp=TEST),
         expand("results/dataprep/{sp}/tree_snp/tree_fig.png", sp=TEST),
         expand("results/dataprep/{sp}/singleton.vcf", sp=TEST),
-        expand("results/dataprep/{sp}/singleton_table.tsv", sp=TEST)
+        expand("results/dataprep/{sp}/singleton_table.tsv", sp=TEST),
+        expand("results/dataprep/{sp}/singletons.annotated.vcf", sp=TEST),
+        expand("results/dataprep/{sp}/snpeff_summary.html", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
