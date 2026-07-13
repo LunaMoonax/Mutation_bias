@@ -24,8 +24,8 @@ rule run_snpeff:
         vcf = "results/dataprep/{sp}/singleton.vcf",
         db = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data/{sp}/snpEffectPredictor.bin")
     output:
-        vcf = "results/dataprep/{sp}/singletons.annotated.vcf",
-        summary = "results/dataprep/{sp}/snpeff_summary.html"
+        vcf = "results/dataprep/{sp}/snpeff/singletons.snpeff_annotated.vcf",
+        summary = "results/dataprep/{sp}/snpeff/snpeff_summary.html"
     params:
         dir = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data"),
         cfg = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/{sp}_snpeff.config")

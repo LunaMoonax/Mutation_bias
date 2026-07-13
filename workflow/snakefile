@@ -21,8 +21,8 @@ rule all:
         expand("results/dataprep/{sp}/tree_snp/tree_fig.png", sp=TEST),
         expand("results/dataprep/{sp}/singleton.vcf", sp=TEST),
         expand("results/dataprep/{sp}/singleton_table.tsv", sp=TEST),
-        expand("results/dataprep/{sp}/singletons.annotated.vcf", sp=TEST),
-        expand("results/dataprep/{sp}/snpeff_summary.html", sp=TEST)
+        expand("results/dataprep/{sp}/snpeff/singletons.snpeff_annotated.vcf", sp=TEST),
+        expand("results/dataprep/{sp}/snpeff/snpeff_summary.html", sp=TEST)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
