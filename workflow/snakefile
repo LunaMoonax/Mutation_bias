@@ -8,6 +8,8 @@ GENOMES = os.path.expanduser(config["genomes"])
 SPECIES = [os.path.basename(os.path.dirname(p))
            for p in glob.glob(os.path.join(GENOMES, "*/fasta_files"))]
 TEST = ["acinetobacter_baumannii", "bordetella_pertussis"]
+THRESHOLDS = config["snp_from_tree"]["thresholds"]
+FREQ_CLASSES = ["singleton", "doubleton", "tripleton"]
 
 rule all:
     input:
@@ -15,14 +17,14 @@ rule all:
         expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST),
         expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
         expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/branch_table.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/stats.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/zero_lookahead.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/tree_fig.png", sp=TEST),
-        expand("results/dataprep/{sp}/singleton.vcf", sp=TEST),
-        expand("results/dataprep/{sp}/singleton_table.tsv", sp=TEST),
-        expand("results/dataprep/{sp}/snpeff/singletons.snpeff_annotated.vcf", sp=TEST),
-        expand("results/dataprep/{sp}/snpeff/snpeff_summary.html", sp=TEST)
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/branch_table.txt", sp=TEST, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/stats.txt", sp=TEST, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/zero_lookahead.txt", sp=TEST, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/tree_fig.png", sp=TEST, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}.vcf", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_table.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}.snpeff_annotated.vcf", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}_snpeff_summary.html", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",

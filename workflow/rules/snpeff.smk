@@ -21,11 +21,13 @@ rule snpeff_database:
 
 rule run_snpeff:
     input:
-        vcf = "results/dataprep/{sp}/singleton.vcf",
+        vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}.vcf",
         db = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data/{sp}/snpEffectPredictor.bin")
     output:
-        vcf = "results/dataprep/{sp}/snpeff/singletons.snpeff_annotated.vcf",
-        summary = "results/dataprep/{sp}/snpeff/snpeff_summary.html"
+        vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}.snpeff_annotated.vcf",
+        summary = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}_snpeff_summary.html"
+    wildcard_constraints:
+        freq_class = "singleton|doubleton|tripleton"
     params:
         dir = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data"),
         cfg = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/{sp}_snpeff.config")

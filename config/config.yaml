@@ -35,4 +35,4 @@ sliding_window:
     threshold: 3
 
 snp_from_tree:
-    threshold: 1
+    thresholds: [1, 2, 3, 4, 5]
