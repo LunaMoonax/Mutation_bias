@@ -1,0 +1,12 @@
+name: python
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.10
+  - pandas
+  - matplotlib
+  - numpy
+  - seaborn
+  - cyvcf2
+  - biopython

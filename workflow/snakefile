@@ -21,10 +21,10 @@ rule all:
         expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/stats.txt", sp=TEST, threshold=THRESHOLDS),
         expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/zero_lookahead.txt", sp=TEST, threshold=THRESHOLDS),
         expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/tree_fig.png", sp=TEST, threshold=THRESHOLDS),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}.vcf", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
         expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_table.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
         expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}.snpeff_annotated.vcf", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}_snpeff_summary.html", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES)
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}_snpeff_summary.html", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_table.ann.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES)
         #QC steps results:
         #"results/ani/ani_distribution.png",
         #"results/ani/ani_violin.png",
