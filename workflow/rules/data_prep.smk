@@ -30,3 +30,13 @@ rule annotate_frequency_tables:
         "../envs/py_dataprep.yaml"
     script:
         "../scripts/annotate_frequency_tables.py"
+
+rule generate_substitutons:
+    input:
+        ref = "results/sourmash/ref/{sp}_ref.fna"
+    output:
+        vcf = "results/dataprep/{sp}/counts/all_substitutions.vcf"
+    conda:
+        "../envs/py_dataprep.yaml"
+    script:
+        "../scripts/generate_all_substitutions.py"
