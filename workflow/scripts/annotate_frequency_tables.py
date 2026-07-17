@@ -27,10 +27,11 @@ def get_codon_pos(cds_pos):
     return ((int(cds) - 1) % 3) + 1
 
 def get_effect_class(eff):
-    if eff in ("synonymous_variant", "start_retained", "stop_retained_variant"):
+    terms = eff.split("&")
+    if any(t in ("synonymous_variant", "start_retained", "stop_retained_variant") for t in terms):
         return "syn"
-    if eff in ("missense_variant", "initiator_codon_variant", "stop_gained",
-               "stop_lost", "start_lost"):
+    if any(t in ("missense_variant", "initiator_codon_variant", "stop_gained",
+                 "stop_lost", "start_lost") for t in terms):
         return "nonsyn"
     return "intergenic"
 

@@ -39,3 +39,22 @@ rule run_snpeff:
             -c {params.cfg} -stats {output.summary} \
             {wildcards.sp} {input.vcf} > {output.vcf}
         """
+
+rule run_snpeff_substitutions:
+    input:
+        vcf = "results/dataprep/{sp}/counts/all_substitutions.vcf",
+        db = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data/{sp}/snpEffectPredictor.bin")
+    output:
+        vcf = "results/dataprep/{sp}/counts/all_substitutions.ann.vcf",
+        summary = "results/dataprep/{sp}/counts/snpeff_summary.html"
+    params:
+        dir = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data"),
+        cfg = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/{sp}_snpeff.config")
+    conda:
+        "../envs/snpeff.yaml"
+    shell:
+        """
+        snpEff ann -dataDir $(realpath {params.dir}) \
+            -c {params.cfg} -stats {output.summary} \
+            {wildcards.sp} {input.vcf} > {output.vcf}
+        """

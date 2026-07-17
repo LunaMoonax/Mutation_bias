@@ -40,3 +40,14 @@ rule generate_substitutons:
         "../envs/py_dataprep.yaml"
     script:
         "../scripts/generate_all_substitutions.py"
+
+rule count_opportunities:
+    input:
+        ann_vcf = "results/dataprep/{sp}/counts/all_substitutions.ann.vcf",
+        ref = "results/sourmash/ref/{sp}_ref.fna"
+    output:
+        table = "results/dataprep/{sp}/counts/count_table.tsv"
+    conda:
+        "../envs/py_dataprep.yaml"
+    script:
+        "../scripts/count_opportunities.py"
