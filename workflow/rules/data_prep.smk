@@ -2,30 +2,24 @@ rule select_frequency_variants:
     input:
         vcf = "results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/recent_snps.vcf"
     output:
-        singleton_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/singleton.vcf",
-        singleton_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/singleton_table.tsv",
-        doubleton_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/doubleton.vcf",
-        doubleton_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/doubleton_table.tsv",
-        tripleton_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/tripleton.vcf",
-        tripleton_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/tripleton_table.tsv"
+        expand("results/dataprep/{{sp}}/frequency_spectrum/snp_per_branch_{{threshold}}/{freq}.vcf",
+               freq=["singleton", "doubleton", "tripleton"]),
+        expand("results/dataprep/{{sp}}/frequency_spectrum/snp_per_branch_{{threshold}}/{freq}_table.tsv",
+               freq=["singleton", "doubleton", "tripleton"]),
     conda:
         "../envs/py.yaml"
     script:
         "../scripts/frequency_selection.py"
 
-rule annotate_frequency_tables:
+rule annotate_frequency_table:
     input:
-        singleton_ann_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/singleton.snpeff_annotated.vcf",
-        singleton_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/singleton_table.tsv",
-        doubleton_ann_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/doubleton.snpeff_annotated.vcf",
-        doubleton_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/doubleton_table.tsv",
-        tripleton_ann_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/tripleton.snpeff_annotated.vcf",
-        tripleton_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/tripleton_table.tsv",
-        ref = "results/sourmash/ref/{sp}_ref.fna"
+        ann_vcf = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq}.snpeff_annotated.vcf",
+        table   = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq}_table.tsv",
+        ref     = "results/sourmash/ref/{sp}_ref.fna"
     output:
-        singleton_ann_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/singleton_table.ann.tsv",
-        doubleton_ann_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/doubleton_table.ann.tsv",
-        tripleton_ann_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/tripleton_table.ann.tsv"
+        ann_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq}_table.ann.tsv"
+    wildcard_constraints:
+        freq = "singleton|doubleton|tripleton"
     conda:
         "../envs/py_dataprep.yaml"
     script:
@@ -51,3 +45,29 @@ rule count_opportunities:
         "../envs/py_dataprep.yaml"
     script:
         "../scripts/count_opportunities.py"
+
+rule build_canonical:
+    input:
+        opp_table = "results/dataprep/{sp}/counts/count_table.tsv",
+        table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq}_table.ann.tsv"
+    output:
+        raw_cann_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq}_raw_canonical.tsv"
+    wildcard_constraints:
+        freq = "singleton|doubleton|tripleton"
+    conda:
+        "../envs/py_dataprep.yaml"
+    script:
+        "../scripts/build_canonical_table.py"
+
+rule build_species_symmetry:
+    input:
+        tables = expand(
+            "results/dataprep/{{sp}}/frequency_spectrum/snp_per_branch_" + str(max(THRESHOLDS)) + "/{freq}_raw_canonical.tsv",
+            freq=["singleton", "doubleton", "tripleton"])
+    output:
+        sym_results = "results/dataprep/{sp}/counts/species_strand_symmetry.tsv",
+        decision    = "results/dataprep/{sp}/counts/species_collapse_decision.txt"
+    conda:
+        "../envs/py_dataprep.yaml"
+    script:
+        "../scripts/build_species_symmetry.py"

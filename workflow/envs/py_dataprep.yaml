@@ -10,3 +10,5 @@ dependencies:
   - seaborn
   - cyvcf2
   - biopython
+  - scipy
+  - statsmodels

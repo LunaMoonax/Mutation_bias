@@ -2,16 +2,10 @@
 
 from Bio import SeqIO
 
-singleton_table_path = snakemake.input.singleton_table
-singleton_ann_vcf_path = snakemake.input.singleton_ann_vcf
-doubleton_table_path  = snakemake.input.doubleton_table
-doubleton_ann_vcf_path  = snakemake.input.doubleton_ann_vcf
-tripleton_table_path  = snakemake.input.tripleton_table
-tripleton_ann_vcf_path  = snakemake.input.tripleton_ann_vcf
-ref_path = snakemake.input.ref
-singleton_ann_table_path  = snakemake.output.singleton_ann_table
-doubleton_ann_table_path  = snakemake.output.doubleton_ann_table
-tripleton_ann_table_path  = snakemake.output.tripleton_ann_table
+table_path   = snakemake.input.table
+ann_vcf_path = snakemake.input.ann_vcf
+ref_path     = snakemake.input.ref
+out_path     = snakemake.output.ann_table
 
 BASES = set("ACGT")
 
@@ -111,9 +105,4 @@ def annotate(table_path, ann_vcf_path, out_path, ref_seq):
 
 ref_seq = load_ref(ref_path)
 
-for table_in, ann_vcf_in, table_out in [
-    (singleton_table_path, singleton_ann_vcf_path, singleton_ann_table_path),
-    (doubleton_table_path, doubleton_ann_vcf_path, doubleton_ann_table_path),
-    (tripleton_table_path, tripleton_ann_vcf_path, tripleton_ann_table_path),
-]:
-    annotate(table_in, ann_vcf_in, table_out, ref_seq)
+annotate(table_path, ann_vcf_path, out_path, ref_seq)
