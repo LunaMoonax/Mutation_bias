@@ -29,7 +29,8 @@ rule all:
         expand("results/dataprep/{sp}/counts/count_table.tsv", sp=TEST),
         expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_raw_canonical.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
         expand("results/dataprep/{sp}/counts/species_strand_symmetry.tsv", sp=TEST),
-        expand("results/dataprep/{sp}/counts/species_collapse_decision.txt", sp=TEST)
+        expand("results/dataprep/{sp}/counts/species_collapse_decision.txt", sp=TEST),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_canonical.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES)
 
         #QC steps results:
         #"results/ani/ani_distribution.png",

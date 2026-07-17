@@ -71,3 +71,16 @@ rule build_species_symmetry:
         "../envs/py_dataprep.yaml"
     script:
         "../scripts/build_species_symmetry.py"
+
+rule collapse_normalise:
+    input:
+        raw_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq}_raw_canonical.tsv",
+        decision  = "results/dataprep/{sp}/counts/species_collapse_decision.txt"
+    output:
+        final_table = "results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq}_canonical.tsv"
+    wildcard_constraints:
+        freq = "singleton|doubleton|tripleton"
+    conda:
+        "../envs/py_dataprep.yaml"
+    script:
+        "../scripts/build_collapse.py"
