@@ -29,7 +29,7 @@ rule generate_substitutons:
     input:
         ref = "results/sourmash/ref/{sp}_ref.fna"
     output:
-        vcf = "results/dataprep/{sp}/counts/all_substitutions.vcf"
+        vcf = temp("results/dataprep/{sp}/counts/all_substitutions.vcf")
     conda:
         "../envs/py_dataprep.yaml"
     script:

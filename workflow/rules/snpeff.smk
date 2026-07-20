@@ -45,7 +45,7 @@ rule run_snpeff_substitutions:
         vcf = "results/dataprep/{sp}/counts/all_substitutions.vcf",
         db = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data/{sp}/snpEffectPredictor.bin")
     output:
-        vcf = "results/dataprep/{sp}/counts/all_substitutions.ann.vcf",
+        vcf = temp("results/dataprep/{sp}/counts/all_substitutions.ann.vcf"),
         summary = "results/dataprep/{sp}/counts/snpeff_summary.html"
     params:
         dir = os.path.join(config["reference_genomes"]["db_dir"], "snpeff/data"),

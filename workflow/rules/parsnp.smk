@@ -3,8 +3,8 @@ rule parsnp:
         ref = "results/sourmash/ref/{sp}_ref.fna",
         genome_dir = f"{GENOMES}/{{sp}}/fasta_files"
     output:
-        align = "results/parsnp/{sp}/parsnp.xmfa",
-        vcf = "results/parsnp/{sp}/parsnp.vcf"
+        align = temp("results/parsnp/{sp}/parsnp.xmfa"),
+        vcf = temp("results/parsnp/{sp}/parsnp.vcf")
     params:
         output_dir = "results/parsnp/{sp}"
     threads: config["parsnp"]["threads"]

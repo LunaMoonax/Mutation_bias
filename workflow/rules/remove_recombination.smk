@@ -2,7 +2,7 @@ rule filter_vcf:
     input:
         vcf = "results/parsnp/{sp}/parsnp.vcf"
     output:
-        vcf = "results/dataprep/{sp}/filtered.vcf"
+        vcf = temp("results/dataprep/{sp}/filtered.vcf")
     conda:
         "../envs/py_dataprep.yaml"
     script:
@@ -12,9 +12,9 @@ rule gubbins:
     input:
         xmfa = "results/parsnp/{sp}/parsnp.xmfa"
     output:
-        aln  = "results/dataprep/{sp}/recombination/alignment.fasta",
+        aln  = temp("results/dataprep/{sp}/recombination/alignment.fasta"),
         recomb = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.gff",
-        embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.embl",
+        embl = temp("results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.embl"),
         tree_labeled = "results/dataprep/{sp}/recombination/{sp}.node_labelled.final_tree.tre"
     params:
         prefix = "results/dataprep/{sp}/recombination/gubbins"
@@ -46,7 +46,7 @@ rule remap_gubbins_coords:
         embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.embl"
     output:
         gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff",
-        embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.ref_coords.embl"
+        embl = temp("results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.ref_coords.embl")
     conda:
         "../envs/py_dataprep.yaml"
     script:
