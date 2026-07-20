@@ -15,6 +15,8 @@ rule pick_genome:
         ref = "results/sourmash/genome/{sp}.txt"
     params:
         genomes_dir = GENOMES
+    conda:
+        "../envs/py.yaml"
     script:
         "../scripts/pick_ref.py"
 
