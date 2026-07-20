@@ -28,10 +28,11 @@ sourmash:
     k: 31
     scale: 1000
     similarity: 0.9
+    similarity_fallback: 0.85
 
 # ncbi tools parameters
 ncbi:
-    data_top: 50
+    data_top: 2000
     contig_n: 5
 
 # gubbins parameters

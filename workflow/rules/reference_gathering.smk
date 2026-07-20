@@ -60,8 +60,8 @@ rule ncbi_datasets:
         "../envs/ncbi.yaml"
     shell:
         """
-        awk -F',' -v n={params.ntop} 'NR>1 && NR<=n+1 {{print $4}}' {input.csv} \
-            | awk '{{print $1}}' > {output.data}.acc
+        awk -v n={params.ntop} 'NR>1 && NR<=n+1' {input.csv} \
+            | grep -oE 'GC[AF]_[0-9]+\\.[0-9]+' > {output.data}.acc
 
         datasets summary genome accession --inputfile {output.data}.acc --as-json-lines \
             | dataformat tsv genome \
@@ -78,6 +78,7 @@ rule filter_pick_ref:
         ref = "results/sourmash/ref/{sp}_ref.acc"
     params:
         sim = config["sourmash"]["similarity"],
+        sim_fallback = config["sourmash"]["similarity_fallback"],
         contig = config["ncbi"]["contig_n"]
     conda:
         "../envs/py_dataprep.yaml"
