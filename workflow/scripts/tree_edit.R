@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# plot a tree with tips coloured by whether they were flagged as an ANI-QC outlier
+
 library(treeio)
 library(ggtree)
 library(ggplot2)
@@ -9,6 +11,7 @@ qc_file <- snakemake@input[["qc"]]
 species <- snakemake@wildcards[["sp"]]
 output_file <- snakemake@output[["tree_colored"]]
 
+# strip ".ref"/".fa" suffixes so tree tip labels match the QC table's genome ids
 clean_id <- function(x) {
     x <- sub("\\.ref$", "", x)
     sub("\\.fa$", "", x)
@@ -29,6 +32,7 @@ data <- data.frame(
 n_tips <- nrow(data)
 n_out <- sum(data$status == "Outlier")
 
+# tree with outlier tips in red
 p <- ggtree(tree, size = 0.2) %<+% data +
     geom_tippoint(aes(color = status)) +
     scale_color_manual(values = c(Kept = "grey70", Outlier = "red")) +

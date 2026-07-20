@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
+# flag clusters of minor-allele SNPs (candidate recombination tracts) as a BED file,
+# independent cross-check against gubbins' own predictions
+
 from collections import defaultdict
 
+# per genome, list the positions where that genome carries the minor allele
 def read_snps_positions(vcf_file):
     per_genome = defaultdict(lambda: defaultdict(list))
 
@@ -29,6 +33,8 @@ def read_snps_positions(vcf_file):
 
     return per_genome
 
+# sliding-window two-pointer scan: flag any position that's part of a run of
+# >= threshold minor-allele SNPs within `window` bp, in any single genome
 def flagged_snps(per_genome, window, threshold):
     flagged = defaultdict(list)
 
@@ -53,6 +59,7 @@ output_file = snakemake.output.flagged
 per_genome = read_snps_positions(vcf_file)
 flagged = flagged_snps(per_genome, window, threshold)
 
+# merge flagged positions into BED intervals (adjacent/touching positions combined)
 with open(output_file, "w") as f:
     f.write("#chrom\tstart\tend\n")
     for chrom in sorted(flagged):

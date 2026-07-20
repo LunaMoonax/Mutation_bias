@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# plot terminal branch length vs median ANI, to spot near-identical/clonal genome clusters
+
 library(ape)
 library(ggplot2)
 
@@ -8,11 +10,13 @@ ani_qc_file <- snakemake@input[["ani_qc"]]
 species <- snakemake@wildcards[["sp"]]
 plot_output <- snakemake@output[["plot"]]
 
+# strip ".ref"/".fa" suffixes so tree tip labels match the QC table's genome ids
 clean_id <- function(x) {
     x <- sub("\\.ref$", "", x)
     sub("\\.fa$", "", x)
 }
 
+# pull out each tip's own terminal branch length (edges whose child node is a tip)
 tree <- read.tree(tree_file)
 n_tips <- length(tree$tip.label)
 is_terminal <- tree$edge[, 2] <= n_tips

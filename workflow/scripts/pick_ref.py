@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# pick a representative reference genome for the species: the QC-passed genome
+# whose ANI is closest to the species median
+
 import pandas as pd
 
 qc_file      = snakemake.input.qc

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# gubbins output (recombination GFF, ancestral-reconstruction EMBL) is in xmfa
+# alignment coordinates; remap both back to the reference genome's own coordinates
+
+# find the reference's index/id/length in the xmfa header (file ending ".ref")
 def find_reference(xmfa_file):
     ref_index = None
     ref_seqid = None
@@ -21,6 +25,8 @@ def find_reference(xmfa_file):
                 break
     return ref_index, ref_seqid, ref_length
 
+# build alignment-column -> reference-position array from the reference's own
+# blocks in the xmfa (None at gap columns)
 def build_alignment_to_ref_map(xmfa_file, ref_index):
     prefix = f"> {ref_index}:"
     mapping = []
@@ -48,16 +54,19 @@ def build_alignment_to_ref_map(xmfa_file, ref_index):
                         ref_pos += 1
     return mapping
 
+# nearest non-gap ref position at/after i, for snapping interval starts
 def nearest_forward(mapping, i):
     while i < len(mapping) and mapping[i] is None:
         i += 1
     return mapping[i] if i < len(mapping) else None
 
+# nearest non-gap ref position at/before i, for snapping interval ends
 def nearest_backward(mapping, i):
     while i >= 0 and mapping[i] is None:
         i -= 1
     return mapping[i] if i >= 0 else None
 
+# exact single-position lookup (no snapping) for point positions like SNPs
 def remap_pos(mapping, aln_pos):
     i = aln_pos - 1
     if 0 <= i < len(mapping):
@@ -67,6 +76,7 @@ def remap_pos(mapping, aln_pos):
 ref_index, ref_seqid, ref_length = find_reference(snakemake.input["xmfa"])
 mapping = build_alignment_to_ref_map(snakemake.input["xmfa"], ref_index)
 
+# remap the recombination-prediction GFF intervals, snapping to nearest ref base at gaps
 with open(snakemake.input["gff"], "r") as fin, open(snakemake.output["gff"], "w") as fout:
     fout.write("##gff-version 3\n")
     fout.write(f"##sequence-region {ref_seqid} 1 {ref_length}\n")
@@ -84,6 +94,8 @@ with open(snakemake.input["gff"], "r") as fin, open(snakemake.output["gff"], "w"
         fields[4] = str(ref_end)
         fout.write("\t".join(fields) + "\n")
 
+# remap the ancestral-reconstruction EMBL's variation positions; drop (and skip the
+# rest of) any variation record that lands on a reference gap
 n_total = n_kept = n_gap = 0
 with open(snakemake.input["embl"], "r") as fin, open(snakemake.output["embl"], "w") as fout:
     skip_record = False

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# test strand symmetry per species (pooled across freq classes at the max threshold),
+# decide whether downstream tables should collapse the 12 mutation classes to 6
+
 import pandas as pd
 from scipy.stats import binomtest
 from statsmodels.stats.multitest import multipletests
@@ -16,6 +19,8 @@ PAIRS = [("C>A", "G>T"), ("C>G", "G>C"), ("C>T", "G>A"),
 
 MIN_TOTAL_N = 50
 
+# pool the per-freq-class canonical tables; sum N_MUTATIONS but take OPPORTUNITIES once
+# per cell (it's a genome-wide constant repeated identically in each input file)
 combined = pd.concat(
     [pd.read_csv(t, sep="\t", dtype={k: str for k in KEYS}) for t in tables],
     ignore_index=True,
@@ -28,6 +33,8 @@ canon = combined.groupby(KEYS, as_index=False).agg(
 by_class = (canon.groupby("MUTATION_CLASS").agg(N=("N_MUTATIONS", "sum"),
             OPP=("OPPORTUNITIES", "sum")))
 
+# for each strand-complement pair, binomial-test observed fwd/rev split against the
+# opportunity-implied null proportion
 rows = []
 for fwd, rev in PAIRS:
     fwd_n = int(by_class.loc[fwd, "N"] if fwd in by_class.index else 0)
@@ -60,6 +67,7 @@ for fwd, rev in PAIRS:
 
 sym = pd.DataFrame(rows)
 
+# multiple-testing correction across the 6 pairs, then classify each pair's verdict
 testable = sym["p_value"].notna()
 sym["p_bonferroni"] = float("nan")
 if testable.any():
@@ -72,6 +80,7 @@ sym["verdict"] = sym["p_bonferroni"].apply(
 
 sym.to_csv(sym_results, sep="\t", index=False)
 
+# collapse to 6 classes only if well-powered (MIN_TOTAL_N) and no pair tested asymmetric
 total_n_pooled = int(sym["fwd_n"].sum() + sym["rev_n"].sum())
 if total_n_pooled < MIN_TOTAL_N:
     decision_label = "insufficient_data"

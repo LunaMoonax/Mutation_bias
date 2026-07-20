@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# drop any SNP that falls inside a gubbins-predicted recombination region
+
 from collections import defaultdict
 
 def read_gff(gff_file):

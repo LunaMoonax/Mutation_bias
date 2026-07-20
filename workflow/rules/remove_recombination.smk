@@ -4,7 +4,7 @@ rule filter_vcf:
     output:
         vcf = "results/dataprep/{sp}/filtered.vcf"
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/filter_vcf.py"
 
@@ -48,7 +48,7 @@ rule remap_gubbins_coords:
         gff = "results/dataprep/{sp}/recombination/{sp}.recombination_predictions.ref_coords.gff",
         embl = "results/dataprep/{sp}/recombination/{sp}.branch_base_reconstruction.ref_coords.embl"
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/remap_gubbins_coords.py"
 
@@ -61,7 +61,7 @@ rule sliding_window:
         window = config["sliding_window"]["window"],
         threshold = config["sliding_window"]["threshold"]
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/rec_sliding_window.py"
 
@@ -73,7 +73,7 @@ rule compare:
     output:
         summary = "results/dataprep/{sp}/recombination/comparing_summary.txt"
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/window_vs_gubbins.py"
 
@@ -84,6 +84,6 @@ rule remove_recombination:
     output:
         rec_free_vcf = "results/dataprep/{sp}/recombination_free.vcf"
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/remove_recombinant_snps.py"

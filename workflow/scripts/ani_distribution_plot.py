@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# QC: per-genome median ANI vs its species, flagging outliers to exclude (writes ani_qc.csv)
+
 import os
 import numpy as np
 import pandas as pd
@@ -11,6 +13,7 @@ FLOOR = snakemake.params.floor
 MAD_K = snakemake.params.mad_k
 MIN_DROP = snakemake.params.min_drop
 
+# strip a genome path down to its bare id (drop directory + fasta extension)
 def genome_id (p):
     n = os.path.basename(str(p).strip())
     for ext in (".gz", ".fasta", ".fna", ".fa"):
@@ -18,6 +21,8 @@ def genome_id (p):
             n = n[: -len(ext)]
     return n
 
+# per-genome median ANI for one species, with a MAD-based outlier fence; genomes
+# below the 95% floor, or far below the fence, are flagged for exclusion
 def specie_ani (edge_list, genome_list):
     df = pd.read_csv(edge_list, sep = "\t")
     genome_ref = df.columns[0]
@@ -27,20 +32,20 @@ def specie_ani (edge_list, genome_list):
     with open(genome_list) as f:
         all_genomes = {genome_id(i) for i in f if i.strip()}
     long = pd.concat([
-        df[[genome_ref, 
+        df[[genome_ref,
             ani]].rename(columns={genome_ref: "genome", ani: "ani"}),
         df[[genome_qry,
             ani]].rename(columns={genome_qry: "genome", ani: "ani"}),
     ])
-    
+
     long["genome"] = long["genome"].map(genome_id)
     med = (long.groupby("genome", as_index=False)[["ani"]]
                .median().rename(columns={"ani": "median_ani"})
     )
-    
+
     missing = sorted(all_genomes - set(med["genome"]))
     if missing:
-        med = pd.concat([med, pd.DataFrame({"genome": missing, 
+        med = pd.concat([med, pd.DataFrame({"genome": missing,
                                              "median_ani" : np.nan})])
 
     present_med = med["median_ani"].dropna()
@@ -60,9 +65,10 @@ def specie_ani (edge_list, genome_list):
     med["mad_fence"] = fence
     med["species_median"] = species_median
 
-    return (med.sort_values("median_ani").reset_index(drop=True), 
+    return (med.sort_values("median_ani").reset_index(drop=True),
            df[ani].to_numpy())
 
+# scatter plot of each species' genomes ranked by median ANI, with the floor/fence/drop lines
 def plot_ani_distribution (all_med, output_dir):
     d = all_med.dropna(subset=["median_ani"]).copy()
     d["rank"] = d.groupby("species")["median_ani"].rank(method="first")
@@ -88,6 +94,7 @@ def plot_ani_distribution (all_med, output_dir):
               dpi=300, bbox_inches="tight")
     plt.close(g.figure)
 
+# violin plot of the raw pairwise ANI distribution per species
 def plot_ani_violin (all_ani, output_dir, cols_per_row=5):
     n = all_ani["species"].nunique()
     n_rows = (n + cols_per_row - 1) // cols_per_row
@@ -113,6 +120,7 @@ lists = {os.path.basename(i).replace("_list.txt", ""): i for i in input_list}
 
 all_med, all_ani = [], []
 
+# run the per-species ANI QC over every species' edge list, then plot + write ani_qc.csv
 for edge_file in sorted(edge_files):
     species = os.path.basename(edge_file).replace("_ani_edge_list.txt", "")
     med, pw = specie_ani(edge_file, lists[species])

@@ -16,7 +16,7 @@ rule pick_genome:
     params:
         genomes_dir = GENOMES
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/pick_ref.py"
 
@@ -80,7 +80,7 @@ rule filter_pick_ref:
         sim = config["sourmash"]["similarity"],
         contig = config["ncbi"]["contig_n"]
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/pick_sourmash_ref.py"
 

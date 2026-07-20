@@ -7,7 +7,7 @@ rule select_frequency_variants:
         expand("results/dataprep/{{sp}}/frequency_spectrum/snp_per_branch_{{threshold}}/{freq}_table.tsv",
                freq=["singleton", "doubleton", "tripleton"]),
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/frequency_selection.py"
 

@@ -28,7 +28,7 @@ rule ani_distributions:
         mad_k = config["ani_distribution_plot"]["mad_k"],
         min_drop = config["ani_distribution_plot"]["min_drop"]
     conda:
-        "../envs/py.yaml"
+        "../envs/py_dataprep.yaml"
     script:
         "../scripts/ani_distribution_plot.py"
     

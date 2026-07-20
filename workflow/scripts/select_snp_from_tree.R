@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# select "recent" SNPs: those reconstructed onto a terminal branch with 1..N events
+
 library(ape)
 
 tree_file <- snakemake@input[["tree"]]
@@ -12,6 +14,7 @@ zero_table_file <- snakemake@output[["zero_lookahead"]]
 tree_fig_file <- snakemake@output[["tree_fig"]]
 N <- snakemake@params[["snp_threshold"]]
 
+# parse gubbins' ancestral-reconstruction EMBL into one row per mutation event (pos + branch)
 read_embl <- function(embl_file) {
     lines <- readLines(embl_file)
 
@@ -37,6 +40,7 @@ embl <- read_embl(embl_file)
 n_events_all <- nrow(embl)
 n_pos_all    <- length(unique(embl$pos))
 
+# keep only events whose position survived recombination filtering (is still in the VCF)
 vcf_lines <- readLines(vcf_file)
 is_header <- startsWith(vcf_lines, "#")
 vcf_pos <- as.integer(sub("^[^\t]+\t(\\d+)\t.*", "\\1", vcf_lines[!is_header]))
@@ -46,10 +50,12 @@ n_events_drop   <- n_events_all - nrow(embl)
 n_events_usable <- nrow(embl)
 n_pos_usable    <- length(unique(embl$pos))
 
+# split "parent->child" node label; internal nodes are named "internal_*" by gubbins
 embl$child <- sub(".*->", "", embl$node)
 embl$terminal <- !startsWith(embl$child, "internal_")
 embl$parent <- sub("->.*", "", embl$node)
 
+# count SNP events per branch
 counts <- aggregate(pos ~ node + child + terminal + parent, data = embl, FUN = length)
 names(counts)[names(counts) == "pos"] <- "n_snps"
 
@@ -58,6 +64,7 @@ tips <- tree$tip.label
 
 n_tips_tree <- Ntip(tree)
 
+# look up a tip's immediate parent's node label via the tree's edge matrix
 parent_of_tip <- function(tip_names) {
   tip_no    <- match(tip_names, tree$tip.label)
   edge_i    <- match(tip_no, tree$edge[, 2])
@@ -65,6 +72,7 @@ parent_of_tip <- function(tip_names) {
   tree$node.label[parent_no - n_tips_tree]
 }
 
+# tips with zero recorded mutation events are missing from `counts` entirely; add them back
 seen         <- counts$child[counts$terminal]
 zeros        <- setdiff(tips, seen)
 zero_parents <- if (length(zeros) > 0) parent_of_tip(zeros) else character(0)
@@ -83,11 +91,14 @@ if (length(zeros) > 0) {
 counts <- counts[order(-counts$terminal, counts$n_snps), ]
 write.table(counts, table_file, sep = "\t", quote = FALSE, row.names = FALSE)
 
+# the actual selection: terminal branches with 1..N events are "recent"
 short_nodes <- counts$node[counts$terminal & counts$n_snps >= 1 & counts$n_snps <= N]
 
 recent_events <- embl[embl$node %in% short_nodes, ]
 recent_pos <- unique(recent_events$pos)
 
+# write out the filtered VCF (one line per position, regardless of how many
+# branches independently reconstructed a mutation there)
 keep <- is_header
 keep[!is_header] <- vcf_pos %in% recent_pos
 writeLines(vcf_lines[keep], vcf_out_file)
@@ -95,6 +106,7 @@ n_written <- sum(keep & !is_header)
 
 snps_into <- setNames(counts$n_snps, counts$child)
 
+# diagnostic table: for each 0-event tip, how many events did its parent branch have
 zero_lookahead <- data.frame(tip = character(0), parent_label = character(0),
                              parent_events = integer(0), stringsAsFactors = FALSE)
 
@@ -140,6 +152,7 @@ zero_dist_at_k <- function(k) {
        cum_uniq_snps = length(unique(embl$pos[embl$node %in% parent_nodes])))
 }
 
+# write the stats report (both to stdout and to file) summarizing the threshold's effect
 con <- file(stats_file, "w")
 out <- function(s) { cat(s, "\n", sep = ""); writeLines(s, con) }
 
@@ -195,6 +208,7 @@ if (n_over_z > 0) out(sprintf("  %3s | %10d %12s %12s", paste0(">", max_show), n
 
 close(con)
 
+# plot the tree, colouring tips by whether they were selected as "recent"
 short_tips <- counts$child[counts$node %in% short_nodes]
 
 tip_col <- ifelse(tree$tip.label %in% short_tips, "firebrick",

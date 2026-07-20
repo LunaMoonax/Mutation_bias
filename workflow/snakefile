@@ -13,24 +13,15 @@ FREQ_CLASSES = ["singleton", "doubleton", "tripleton"]
 
 rule all:
     input:
-        expand("results/sourmash/ref/{sp}_fallbacks.csv", sp=TEST),
-        expand("results/sourmash/ref/{sp}_ref.gff", sp=TEST),
-        expand("results/dataprep/{sp}/recombination/alignment.fasta", sp=TEST),
-        expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=TEST),
-        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/branch_table.txt", sp=TEST, threshold=THRESHOLDS),
-        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/stats.txt", sp=TEST, threshold=THRESHOLDS),
-        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/zero_lookahead.txt", sp=TEST, threshold=THRESHOLDS),
-        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/tree_fig.png", sp=TEST, threshold=THRESHOLDS),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_table.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}.snpeff_annotated.vcf", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}_snpeff_summary.html", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_table.ann.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
-        expand("results/dataprep/{sp}/counts/all_substitutions.ann.vcf", sp=TEST),
-        expand("results/dataprep/{sp}/counts/count_table.tsv", sp=TEST),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_raw_canonical.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
-        expand("results/dataprep/{sp}/counts/species_strand_symmetry.tsv", sp=TEST),
-        expand("results/dataprep/{sp}/counts/species_collapse_decision.txt", sp=TEST),
-        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_canonical.tsv", sp=TEST, threshold=THRESHOLDS, freq_class=FREQ_CLASSES)
+        expand("results/dataprep/{sp}/recombination/comparing_summary.txt", sp=SPECIES),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/branch_table.txt", sp=SPECIES, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/stats.txt", sp=SPECIES, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/zero_lookahead.txt", sp=SPECIES, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/tree_snp/snp_per_branch_{threshold}/tree_fig.png", sp=SPECIES, threshold=THRESHOLDS),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/snpeff/{freq_class}_snpeff_summary.html", sp=SPECIES, threshold=THRESHOLDS, freq_class=FREQ_CLASSES),
+        expand("results/dataprep/{sp}/counts/species_strand_symmetry.tsv", sp=SPECIES),
+        expand("results/dataprep/{sp}/counts/species_collapse_decision.txt", sp=SPECIES),
+        expand("results/dataprep/{sp}/frequency_spectrum/snp_per_branch_{threshold}/{freq_class}_canonical.tsv", sp=SPECIES, threshold=THRESHOLDS, freq_class=FREQ_CLASSES)
 
         #QC steps results:
         #"results/ani/ani_distribution.png",

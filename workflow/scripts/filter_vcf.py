@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# keep only PASS, biallelic, single-base SNPs (drop indels, multiallelic, non-ACGT)
+
 BASES = set("ACGT")
 
 vcf_file = snakemake.input.vcf

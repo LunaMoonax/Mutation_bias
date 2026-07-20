@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# build an exhaustive VCF of every possible substitution at every ref position (opportunity space)
+
 from Bio import SeqIO
 
 ref_path = snakemake.input.ref
@@ -19,6 +21,7 @@ with open(all_sub_vcf_path, "w") as fout:
         fout.write(f"##contig=<ID={chrom},length={len(rec.seq)}>\n")
     fout.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
 
+    # for every position, write the 3 non-ref bases as separate substitution records
     for chrom, rec in ref_seq.items():
         seq = str(rec.seq).upper()
         for i, ref in enumerate(seq):

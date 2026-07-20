@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# tally the exhaustive-substitution VCF into opportunity counts per (class, context, codon, effect)
+
 from collections import Counter
 from Bio import SeqIO
 
@@ -10,9 +12,11 @@ species = snakemake.wildcards.sp
 
 BASES = ("A", "C", "G", "T")
 
+# load the reference FASTA (all contigs) into a dict keyed by contig id
 def load_ref(ref_path):
     return SeqIO.to_dict(SeqIO.parse(ref_path, "fasta"))
 
+# snpEff's CDS-position field ("123/456") -> 1/2/3 codon position, or "intergenic"
 def get_codon_pos(cds_pos):
     if not cds_pos or cds_pos == "":
         return "intergenic"
@@ -21,6 +25,7 @@ def get_codon_pos(cds_pos):
         return "intergenic"
     return ((int(cds) - 1) % 3) + 1
 
+# snpEff effect term(s) -> syn/nonsyn/intergenic; handles compound "a&b" terms
 def get_effect_class(eff):
     terms = eff.split("&")
     if any(t in ("synonymous_variant", "start_retained", "stop_retained_variant") for t in terms):
@@ -30,6 +35,7 @@ def get_effect_class(eff):
         return "nonsyn"
     return "intergenic"
 
+# trinucleotide context (5', ref base, 3') at a position; None at contig edges or ambiguous bases
 def get_context(seqs, chrom, pos):
     seq = seqs[chrom]
     idx = pos - 1
@@ -45,6 +51,7 @@ seqs = {chrom: str(rec.seq).upper() for chrom, rec in ref_seq.items()}
 counts  = Counter()
 skipped = 0
 
+# stream the annotated VCF once, incrementing the opportunity count per cell
 with open(ann_vcf_path) as f:
     for line in f:
         if line.startswith("#"):
@@ -73,6 +80,7 @@ with open(ann_vcf_path) as f:
 
         counts[(f"{ref}>{alt}", five, three, codon, effect)] += 1
 
+# write one row per (class, context, codon, effect) cell
 with open(out_path, "w") as out:
     out.write("MUTATION_CLASS\tFIVE PRIME\tTHREE PRIME\tCODON POS\tEFFECT\tOPPORTUNITIES\n")
     for key, n in sorted(counts.items(), key=lambda kv: tuple(str(x) for x in kv[0])):

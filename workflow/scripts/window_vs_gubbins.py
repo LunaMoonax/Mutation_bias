@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
+# QC report: how well does the sliding-window recombination heuristic agree with
+# gubbins' own predictions, on the actual observed VCF SNPs
+
 import bisect
 from collections import Counter, defaultdict
 
+# expand BED intervals (0-based half-open) into a set of 1-based (chrom, pos) positions
 def read_bed(bed_file):
     pos = set()
     with open(bed_file) as f:
@@ -14,6 +18,7 @@ def read_bed(bed_file):
             pos.update((chrom, p) for p in range(int(fields[1]) + 1, int(fields[2]) + 1))
     return pos
 
+# read + merge overlapping/adjacent gubbins recombination intervals per chrom
 def read_gff(gff_file):
     intervals = defaultdict(list)
     with open(gff_file) as f:
@@ -35,6 +40,7 @@ def read_gff(gff_file):
         merged[chrom] = m
     return merged
 
+# all VCF SNP positions, plus each one's minor-allele carrier count
 def read_vcf(vcf_file):
     pos = set()
     minor_count = {}
@@ -53,6 +59,7 @@ def read_vcf(vcf_file):
             minor_count[(chrom, p)] = min(n_alt, n_ref)
     return pos, minor_count
 
+# binary-search which merged gubbins interval (if any) contains position p
 def interval_index(chrom, p, intervals_by_chrom, starts_by_chrom):
     intervals = intervals_by_chrom.get(chrom)
     if not intervals:
@@ -63,6 +70,7 @@ def interval_index(chrom, p, intervals_by_chrom, starts_by_chrom):
         return i
     return -1
 
+# bucket a set of positions by their minor-allele carrier count
 def freq_spectrum(pos_set, minor_count):
     c = Counter()
     for key in pos_set:
@@ -82,6 +90,8 @@ gubbins_all = read_gff(snakemake.input.gubbins_gff)
 all_snps, minor_count = read_vcf(snakemake.input.vcf)
 gub_start   = {chrom: [s for s, _ in ivs] for chrom, ivs in gubbins_all.items()}
 
+# restrict gubbins regions down to just the VCF SNP positions they contain, so both
+# methods are compared over the same universe of actual observed SNPs
 gubbins_snp_set  = {(chrom, p) for chrom, p in all_snps if interval_index(chrom, p, gubbins_all, gub_start) >= 0}
 both_set         = window_all & gubbins_snp_set
 window_only_set  = window_all - gubbins_snp_set
@@ -103,6 +113,7 @@ precision_snp     = both / n_win if n_win else None
 def pct(x):
     return f"{x:.1%}" if x is not None else "n/a"
 
+# write the agreement report (precision/recall/Jaccard + per-set frequency spectra)
 with open(snakemake.output.summary, "w") as f:
     def out(s):
         print(s)

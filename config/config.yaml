@@ -2,37 +2,47 @@
 genomes: ""
 
 # QC parameters
+# skani tool parameters
 skani:
     threads: 16
 
+# ANI distribution calculation parameters
 ani_distribution_plot:
     floor: 95
     mad_k: 5
     min_drop: 0.5
 
+# parsnp parameters
 # parsnp is used both in QC and main workflow
 parsnp:
     threads: 16
 
 # Main workflow parameters
+
+# Reference genome gathering parameters
 reference_genomes:
     db_dir: "../../databases"
 
+# sourmash parameters
 sourmash:
     k: 31
     scale: 1000
     similarity: 0.9
 
+# ncbi tools parameters
 ncbi:
     data_top: 50
     contig_n: 5
 
+# gubbins parameters
 gubbins:
     threads: 16
 
+# slidin window algorythm parameters
 sliding_window:
     window: 2000
     threshold: 3
 
+# selection of snps from the tree parameters
 snp_from_tree:
     thresholds: [1, 2, 3, 4, 5]

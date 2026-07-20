@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# apply the species-level collapse decision: fold 12 mutation classes down to the
+# 6 pyrimidine-referenced ones if symmetric, otherwise keep all 12 as-is
+
 import pandas as pd
 
 raw_table_path = snakemake.input.raw_table
@@ -12,10 +15,12 @@ COMPLEMENT = {"A": "T", "C": "G", "G": "C", "T": "A"}
 
 PYRIMIDINE_REF = {"C", "T"}
 
+# reverse-complement a mutation class string, e.g. "G>A" -> "C>T"
 def revcomp_class(mut):
     ref, alt = mut.split(">")
     return f"{COMPLEMENT[ref]}>{COMPLEMENT[alt]}"
 
+# pull the "decision" value out of the species_collapse_decision.txt key-value file
 def read_decision(path):
     with open(path) as f:
         for line in f:
@@ -50,6 +55,7 @@ if decision == "collapse_to_6":
 else:
     spectrum = "full_12"
 
+# rate per opportunity, NaN (not divide-by-zero) where a cell has no opportunities
 canon["RATE"] = canon["N_MUTATIONS"] / canon["OPPORTUNITIES"].where(canon["OPPORTUNITIES"] > 0)
 
 canon["SPECTRUM"] = spectrum

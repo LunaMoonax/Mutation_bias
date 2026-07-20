@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# pick the NCBI reference genome for a species: closest sourmash hit that is a
+# complete, low-contig-count assembly; log everything rejected as a fallback
+
 import pandas as pd
 
 sourmash_csv = snakemake.input.sourmash_csv
@@ -22,6 +25,8 @@ have_meta = combined[combined["Assembly Accession"].notna()]
 fallbacks = []
 chosen_ref = None
 
+# walk sourmash hits in order (best match first); take the first one that qualifies,
+# record every rejected candidate with its reason
 for _, row in have_meta.iterrows():
     if row["similarity"] >= similarity:
         if row["Assembly Level"] == "Complete Genome" and row["Assembly Stats Number of Contigs"] <= contig_n:

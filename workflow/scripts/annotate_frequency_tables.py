@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# join snpEff annotation (codon position, effect) and reference context onto a frequency table
+
 from Bio import SeqIO
 
 table_path   = snakemake.input.table
@@ -9,9 +11,11 @@ out_path     = snakemake.output.ann_table
 
 BASES = set("ACGT")
 
+# load the reference FASTA (all contigs) into a dict keyed by contig id
 def load_ref(ref_path):
     return SeqIO.to_dict(SeqIO.parse(ref_path, "fasta"))
 
+# snpEff's CDS-position field ("123/456") -> 1/2/3 codon position, or "intergenic"
 def get_codon_pos(cds_pos):
     if not cds_pos or cds_pos == "":
         return "intergenic"
@@ -20,6 +24,7 @@ def get_codon_pos(cds_pos):
         return "intergenic"
     return ((int(cds) - 1) % 3) + 1
 
+# snpEff effect term(s) -> syn/nonsyn/intergenic; handles compound "a&b" terms
 def get_effect_class(eff):
     terms = eff.split("&")
     if any(t in ("synonymous_variant", "start_retained", "stop_retained_variant") for t in terms):
@@ -29,6 +34,7 @@ def get_effect_class(eff):
         return "nonsyn"
     return "intergenic"
 
+# read the snpEff-annotated VCF -> {(chrom, pos): (codon_pos, effect)} for the first ANN= entry
 def parse_ann_vcf(ann_vcf_path):
     out = {}
     with open(ann_vcf_path) as f:
@@ -51,6 +57,7 @@ def parse_ann_vcf(ann_vcf_path):
             out[(chrom, pos)] = (get_codon_pos(cds_pos), get_effect_class(eff))
     return out
 
+# read a frequency table (optional leading "#" comment line, then header + rows)
 def read_table(table_path):
     with open(table_path) as f:
         lines = f.readlines()
@@ -61,6 +68,7 @@ def read_table(table_path):
     return comment, header, rows
 
 
+# trinucleotide context (5', ref base, 3') at a position; None at contig edges or ambiguous bases
 def get_context(ref_seq, chrom, pos):
     seq = str(ref_seq[chrom].seq).upper()
     idx = pos - 1
@@ -71,6 +79,7 @@ def get_context(ref_seq, chrom, pos):
         return None
     return five, base, three
 
+# merge table rows with context + snpEff annotation, write the annotated table
 def annotate(table_path, ann_vcf_path, out_path, ref_seq):
     comment, header, rows = read_table(table_path)
     ann = parse_ann_vcf(ann_vcf_path)
@@ -103,6 +112,7 @@ def annotate(table_path, ann_vcf_path, out_path, ref_seq):
     
     print(f"{out_path}: {n_written} annotated, {n_skipped} skipped (contig edge)")
 
+# entry point
 ref_seq = load_ref(ref_path)
 
 annotate(table_path, ann_vcf_path, out_path, ref_seq)

@@ -5,6 +5,8 @@ rule pick_tree_ref:
         ref = "results/QC/tree/{sp}_ref.txt"
     params:
         genomes_dir = GENOMES
+    conda:
+        "../envs/py_dataprep.py"
     script:
         "../scripts/pick_ref.py"
 

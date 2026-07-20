@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# split recent_snps.vcf into singleton/doubleton/tripleton VCFs + tables, by carrier count
+
 vcf_file = snakemake.input.vcf
 
 singleton_vcf = open(snakemake.output.singleton_vcf, "w")
@@ -18,6 +20,7 @@ rows_by_count = {1: singleton_rows, 2: doubleton_rows, 3: tripleton_rows}
 n_total = 0
 counts = {1: 0, 2: 0, 3: 0}
 
+# stream through the VCF once, sorting each variant into its carrier-count bucket
 with open(vcf_file) as fin:
     for line in fin:
         if line.startswith("#CHROM"):
@@ -51,6 +54,7 @@ with open(vcf_file) as fin:
 for f in vcf_by_count.values():
     f.close()
 
+# write out the per-bucket table + a summary comment line
 for n_carriers, rows in rows_by_count.items():
     pct = counts[n_carriers] / n_total if n_total else 0
     print(f"{counts[n_carriers]} / {n_total} ({pct:.1%}) are {names[n_carriers]}s")
